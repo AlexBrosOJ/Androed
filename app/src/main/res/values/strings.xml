@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="profile_title">Личный кабинет</string>
+    <string name="profile_login_label">Логин</string>
+    <string name="profile_tasks">Мои задачи</string>
+    <string name="profile_logout">Выйти из аккаунта</string>
+</resources>
