@@ -14,6 +14,13 @@ class LoginActivity : AppCompatActivity() {
 
     var usersDatabase = mutableMapOf<String, String>()
 
+    private fun validateCredentials(login: String, password: String): Boolean {
+        if (login.isNotBlank() && password.isNotBlank()) return true
+
+        Toast.makeText(this, "Заполните логин и пароль!", Toast.LENGTH_SHORT).show()
+        return false
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,10 +41,7 @@ class LoginActivity : AppCompatActivity() {
             val login = etLogin.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            if (login.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Заполните логин и пароль!", Toast.LENGTH_SHORT).show()
-            } else {
-
+            if (validateCredentials(login, password)) {
                 usersDatabase[login] = password
                 Toast.makeText(this, "Пользователь $login успешно сохранен!", Toast.LENGTH_SHORT).show()
 
@@ -50,9 +54,7 @@ class LoginActivity : AppCompatActivity() {
             val login = etLogin.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            if (login.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Заполните логин и пароль!", Toast.LENGTH_SHORT).show()
-            } else {
+            if (validateCredentials(login, password)) {
 
                 if (usersDatabase.containsKey(login) && usersDatabase[login] == password) {
                     Toast.makeText(this, "Успешный вход!", Toast.LENGTH_SHORT).show()

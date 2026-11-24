@@ -39,6 +39,22 @@ class ProfileActivity : AppCompatActivity() {
                 .putExtra(EXTRA_LOGIN, login)
             startActivity(tasksIntent)
         }
+        val helpButton = findViewById<Button>(R.id.profileHelp)
+        val fragments = supportFragmentManager
+        helpButton.isEnabled = fragments.backStackEntryCount == 0
+        fragments.addOnBackStackChangedListener {
+            helpButton.isEnabled = fragments.backStackEntryCount == 0
+        }
+
+        helpButton.setOnClickListener {
+            helpButton.isEnabled = false
+            fragments.beginTransaction()
+                .setReorderingAllowed(true)
+                .replace(R.id.profileHelpContainer, ProfileHelpFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
         findViewById<Button>(R.id.profileLogout).setOnClickListener {
             openLogin()
         }

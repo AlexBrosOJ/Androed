@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.database.sqlite.SQLiteException
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -22,10 +23,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tasksFile: AtomicFile
 
-    private fun loadTasks() {
-        if (!tasksFile.baseFile.exists()) return
+    private lateinit var taskDb: TasksDb
+
+    private fun readOldTasks(): List<String> {
+        if (!tasksFile.baseFile.exists()) return emptyList()
         val json = JSONArray(tasksFile.readFully().toString(Charsets.UTF_8))
-        tasks.addAll(List(json.length()) { json.getString(it) })
+        return List(json.length()) { json.getString(it) }
     }
 
     private fun showLoadError() {
@@ -36,23 +39,20 @@ class MainActivity : AppCompatActivity() {
     private fun updateTasks(change: (MutableList<String>) -> Unit): Boolean {
         val updated = ArrayList(tasks)
         change(updated)
-        val bytes = JSONArray(updated).toString().toByteArray(Charsets.UTF_8)
         try {
-            val stream = tasksFile.startWrite()
-            try {
-                stream.write(bytes)
-                tasksFile.finishWrite(stream)
-            } catch (error: IOException) {
-                tasksFile.failWrite(stream)
-                throw error
-            }
-        } catch (error: IOException) {
+            taskDb.save(updated)
+        } catch (error: SQLiteException) {
             Toast.makeText(this, "Не удалось сохранить задачи", Toast.LENGTH_LONG).show()
             return false
         }
         tasks.clear()
         tasks.addAll(updated)
         return true
+    }
+
+    override fun onDestroy() {
+        if (::taskDb.isInitialized) taskDb.close()
+        super.onDestroy()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         }
         val userKey = java.util.UUID.nameUUIDFromBytes(login.toByteArray(Charsets.UTF_8))
         tasksFile = AtomicFile(File(filesDir, "tasks_$userKey.json"))
+        taskDb = TasksDb(this, userKey.toString(), ::readOldTasks)
 
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -78,8 +79,11 @@ class MainActivity : AppCompatActivity() {
         val button: Button = findViewById(R.id.button)
 
         try {
-            loadTasks()
+            tasks.addAll(taskDb.load())
         } catch (error: IOException) {
+            showLoadError()
+            return
+        } catch (error: SQLiteException) {
             showLoadError()
             return
         } catch (error: org.json.JSONException) {

@@ -63,6 +63,17 @@
             android:textColor="#302300" />
 
         <Button
+            android:id="@+id/profileHelp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Как пользоваться" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/profileHelpContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
             android:id="@+id/profileLogout"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
